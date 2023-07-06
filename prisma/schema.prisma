@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id                Int                 @id @default(autoincrement())
+  user_id           String              @unique
+  full_name         String
+  email             String              @unique
+  company_name      String
+  company_address   String
+  contact           String
+  type              String
+  role              String
+  access            String              @default("user")
+  Projects          Projects[]
+  ProductsInProject ProductsInProject[]
+
+  @@map(name: "Users")
+}
+
+model Products {
+  id                Int                 @id @default(autoincrement())
+  product_id        String              @unique
+  name              String
+  description       String
+  image_link        String
+  category          String
+  specifications    String
+  ProductsInProject ProductsInProject[]
+  last_updated_at   DateTime            @default(now())
+  ProductTags       ProductTags[]
+}
+
+model Projects {
+  id                Int                 @id @default(autoincrement())
+  project_id        String              @unique
+  created_at        DateTime            @default(now())
+  name              String
+  project_type      String
+  project_area      String
+  project_phase     String
+  address           String              @default("")
+  pincode           String
+  delivery_at       String              @default("")
+  status            String              @default("Active")
+  user              Users               @relation(fields: [user_id], references: [user_id])
+  user_id           String
+  ProductsInProject ProductsInProject[]
+}
+
+model ProductsInProject {
+  id                     Int      @id @default(autoincrement())
+  products_in_project_id String   @unique @default(cuid())
+  status                 String   @default("Product Added")
+  address_type           String   @default("")
+  project                Projects @relation(fields: [project_id], references: [project_id])
+  project_id             String
+  product                Products @relation(fields: [product_id], references: [product_id])
+  product_id             String
+  user                   Users    @relation(fields: [user_id], references: [user_id])
+  user_id                String
+  last_updated_at        DateTime @default(now())
+}
+
+model Tags {
+  id          Int           @id @default(autoincrement())
+  tag_id      String        @unique
+  tag_name    String        @unique
+  ProductTags ProductTags[]
+}
+
+model ProductTags {
+  id         Int      @id @default(autoincrement())
+  tag        Tags     @relation(fields: [tag_id], references: [tag_id])
+  tag_id     String
+  product    Products @relation(fields: [product_id], references: [product_id])
+  product_id String
+}
